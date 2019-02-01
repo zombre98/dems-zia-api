@@ -4,6 +4,8 @@
 
 The goal of this API is to simplify the way you add modules in your ZIA<br/> In order to do this we tried to minimize the constraints that we impose<br/>
 
+Documentation : https://zia.bilel-fourati.fr/
+
 For example to add your modules you just have to make : 
 ```cpp
 extern "C" {
