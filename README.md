@@ -54,6 +54,8 @@ There is four Stages implemented:<br/>
 | **middle** | It's called before last during the event (Example : PHP module)       |
 | **last**  | It's called in the last moment of the event (Example : Encryption SSL module) |
 
+**If multiple functions hook to the same moment they will be called in the order the modules were loaded.**
+
 Example : 
 
 When a request is received :
