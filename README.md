@@ -72,8 +72,7 @@ call to the Stage and to the different "Moments" provided:
 
 For example if you want to Hook a module Function to the beginning of the stage `request` you will have to do :
 
-`manager.request().hookToFirst("moduleName", std::function<CodeStatus(Context &)>)`
-(A module can hook one function to one Moment, so 3 functions max. per Stage)
+`manager.request().hookToFirst("moduleName", std::function<CodeStatus(Context &)>)`<br/>
 As you see the function takes a Context (see **Context**) and return a Status code defined in an enum : 
 
  ```cpp
