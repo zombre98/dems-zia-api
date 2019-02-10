@@ -54,10 +54,10 @@ Functions registered to each stage should be called when the following happens:
 ## Stages
 
 A stage is composed of three moments allowing the organization of modules in the specified stage.
-They are required through the use of the three function:
-* `hookToFirst`
+They are used through
+* `hookToFirst`,
 * `hookToMiddle`
-* `hookToLast`
+* and `hookToLast`
 available on each stage.
 
 | Moment | Description |
