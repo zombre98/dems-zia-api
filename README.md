@@ -2,11 +2,11 @@
 ##### The goal of this API is to provide an example on how to add modules to your Zia project
 ###### Produced by Armand Megrot, Bilel Fourati, Anatole Juge and Thomas Burgaud
 
-The goal of this API is to simplify the way you add modules in your ZIA
+The goal of this API is to simplify the way you add modules in your ZIA<br/>
 In order to do that we tried to minimize the constraints that we impose
 
-Documentation: https://zia.bilel-fourati.fr/
-Discord: https://discord.gg/TwHGTn
+Documentation: https://zia.bilel-fourati.fr/<br/>
+Discord: https://discord.gg/TwHGTn<br/>
 Issues: https://github.com/zombre98/dems-zia-api/issues
 
 For example to add a module you just have to do:
@@ -25,12 +25,12 @@ extern "C" {
 
 ## AModulesManager
 
-AModulesManager should be instanciated **only once** in your project.
-It will let you load a directory of modules or a single module via the functions `loadModules` or `loadOneModule` respectively.
-The modules **must** be loaded in alphabetical order.
+AModulesManager should be instanciated **only once** in your project.<br/>
+It will let you load a directory of modules or a single module via the functions `loadModules` or `loadOneModule` respectively.<br/>
+The modules **must** be loaded in alphabetical order.<br/>
 AModulesManager provides a StageManager through `getStageManager` (cf. StageManager section below).
 
-Each module must expose a function called `registerHooks` through the use of `extern`.
+Each module must expose a function called `registerHooks` through the use of `extern`.<br/>
 The server must call this function passing the StageManager as arguement. The module will use it to hook functions at different stages of the request process.
 
 For example, here is some code that would go in the `registerHooks` function of a module:
@@ -41,7 +41,7 @@ stageManager.request().hookToMiddle("MyModule", myHandlerFunction);
 
 ## StageManager
 
-StageManager should handle the different stages of a request process.
+StageManager should handle the different stages of a request process.<br/>
 Functions registered to each stage should be called when the following happens:
 
 | Stage | Description |
@@ -54,11 +54,11 @@ Functions registered to each stage should be called when the following happens:
 
 ## Stages
 
-A stage is composed of three moments allowing the organization of modules in the specified stage.
+A stage is composed of three moments allowing the organization of modules in the specified stage.<br/>
 They are used through
 * `hookToFirst`,
 * `hookToMiddle`
-* and `hookToLast`
+* and `hookToLast`<br/>
 available on each stage.
 
 | Moment | Description |
@@ -138,7 +138,7 @@ namespace headers {
 
 #### std::variant
 
-Here is an example of how to use a `std::variant`:
+Here is an example of how to use a `std::variant`:<br/>
 (a [std::variant](https://en.cppreference.com/w/cpp/utility/variant) is like an `union`, but type-safe)
 ```cpp
 // This is how you staticaly create a dems::Context.
@@ -172,7 +172,7 @@ public:
 	virtual void setHeader(const std::string &headerName, const std::string &value) = 0;
 };
 ```
-Every headers are key/value pairs. It's up to you to choose the underlying container.
+Every headers are key/value pairs. It's up to you to choose the underlying container.<br/>
 A headers presents as follows:
 * Name: `accept`
 * Value: `application/json`
