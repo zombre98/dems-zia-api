@@ -53,7 +53,7 @@ Functions registered to each stage should be called when the following happens:
 
 ## Stages
 
-A stage is composed of three moments which permit the organization of modules in the specified stage.
+A stage is composed of three moments allowing the organization of modules in the specified stage.
 They are required through the use of the three function:
 * `hookToFirst`
 * `hookToMiddle`
