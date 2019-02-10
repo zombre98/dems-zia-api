@@ -5,7 +5,8 @@
 The goal of this API is to simplify the way you add modules in your ZIA
 In order to do that we tried to minimize the constraints that we impose
 
-Documentation : https://zia.bilel-fourati.fr/
+Documentation: https://zia.bilel-fourati.fr/
+Discord: https://discord.gg/TwHGTn
 
 For example to add a module you just have to do:
 ```cpp
