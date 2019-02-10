@@ -1,17 +1,18 @@
 # dems API Zia
-##### The goal of this Api is to provide a example on how to add modules to your Zia project
+##### The goal of this API is to provide an example on how to add modules to your Zia project
 ###### Produced by Armand Megrot, Bilel Fourati, Anatole Juge and Thomas Burgaud
 
-The goal of this API is to simplify the way you add modules in your ZIA<br/> In order to do this we tried to minimize the constraints that we impose<br/>
+The goal of this API is to simplify the way you add modules in your ZIA
+In order to do that we tried to minimize the constraints that we impose
 
 Documentation : https://zia.bilel-fourati.fr/
 
-For example to add your modules you just have to make : 
+For example to add a module you just have to do:
 ```cpp
 extern "C" {
 
     void registerHooks(api::StageManager &manager) {
-        manager.request().hookToEnd("Example", [](api::Context &ctx) {
+        manager.request().hookToEnd("MyModule", [](api::Context &ctx) {
             std::cout << "I'm an example module" << std::endl;
             return api::CodeStatus::OK;
         });
@@ -22,18 +23,18 @@ extern "C" {
 
 ## AModulesManager
 
-The implementation of AModulesManager **should** be instanciated **only once** in your project.<br/>
-It will let you load a directory of modules or a single module via the function `loadModules` or `loadOneModule`.<br/>
-AModulesManager bring you an implementation of StatesManager through `getStageManager`
+AModulesManager should be instanciated **only once** in your project.
+It will let you load a directory of modules or a single module via the functions `loadModules` or `loadOneModule` respectively.
+AModulesManager provides a StageManager through `getStageManager` (cf. StageManager section below).
 
-Each module needs to `extern` a function called `registerHooks`
-You should give them your StageManager. The StageManager will be used in order to hook* his functions where he wants.<br/>
- `registerHooks` will be used to hook your functions.
+Each module must expose a function called `registerHooks` through the use of `extern`.
+The server must call this function passing the StageManager as arguement. The module will use it to hook functions at different stages of the request process.
 
-For example, in pseudo-code, if you call your **StageManager** `manager` : <br/>
-`manager.stage.moment("moduleName", module)`
-
-\* **A hook** is a function that will be called each time that a Stage is triggered.Three different **moments** exist (see the Stage section for more details).
+For example, here is some code that would go in the `registerHooks` function of a module:
+```cpp
+stageManager.request().hookToMiddle("MyModule", myHandlerFunction);
+```
+(See the following sections for an explanation of `request()` and `hookToMiddle`)
 
 ## StageManager
 
