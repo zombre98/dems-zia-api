@@ -138,7 +138,7 @@ namespace headers {
 #### std::variant
 
 Here is an example of how to use a `std::variant`:
-(a std::variant is like an `union`, but type-safe)
+(a [std::variant](https://en.cppreference.com/w/cpp/utility/variant) is like an `union`, but type-safe)
 ```cpp
 // This is how you staticaly create a dems::Context.
 dems::Context context{
