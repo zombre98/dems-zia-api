@@ -179,8 +179,6 @@ A headers presents as follows:
 ---
 
 That's all !
-If you have any questions contact:
-[anatole.juge@epitech.eu](mailto:anatole.juge@epitech.eu?subject=G%201%20kestion%20sur%20la%20pays)
 
 Here is a very very simple Logger module implementation:
 ```cpp
