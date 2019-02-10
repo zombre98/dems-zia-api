@@ -38,24 +38,24 @@ stageManager.request().hookToMiddle("MyModule", myHandlerFunction);
 
 ## StageManager
 
-StageManager will manage many Stages in your Server.
-There is four Stages implemented:<br/>
+StageManager should handle the different stages of a request process.
+Functions registered to each stage should be called when the following happens:
 
-| Stage      | Description |
-| :----:       |    :----:     |
-| **connection** | It should provide hooks* for when the clients connects to the server. |
-| **request** | When a server receives a request, the provided hooks of this Stage should be called.      |
-| **chunks**  | When a data it received by a chunk (see rfc2616) it should call the provided hooks of this stage      |
-| **disconnection**  | It should provide hooks for when the clients disconnects from the server.   |
+| Stage | Description |
+| --- | --- |
+| **connection** | When a connection is accepted. |
+| **request** | When the server has read the request. |
+| **chunks** | When data is received by chunks (see [rfc2616](https://www.ietf.org/rfc/rfc2616.txt) section 3.6.1) functions hooked to this stage will be called everytime a chunk is read. |
+| **disconnection** | When the client disconnects from the server. |
 
 
 ## Stage
 
-| Moment      | Description |
-| :----:       |    :----:     |
-| **first** | It's called before middle when the event occurs (Example : SSL module)     |
-| **middle** | It's called before last during the event (Example : PHP module)       |
-| **last**  | It's called in the last moment of the event (Example : Encryption SSL module) |
+| Moment | Description |
+| --- | --- |
+| **first** | It's called before middle when the event occurs (e.g. SSL module). |
+| **middle** | It's called before last during the event (e.g. PHP module). |
+| **last** | It's called in the last moment of the event (e.g. Encryption SSL module). |
 
 **If multiple functions hook to the same moment they will be called in the order the modules were loaded.**
 
