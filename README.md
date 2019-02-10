@@ -58,7 +58,8 @@ A stage is composed of three moments allowing the organization of modules in the
 They are used through
 * `hookToFirst`,
 * `hookToMiddle`
-* and `hookToLast`<br/>
+* and `hookToLast`
+
 available on each stage.
 
 | Moment | Description |
