@@ -159,7 +159,7 @@ std::cout << std::get<dems::headers::Request>(context.request.firstLine).path <<
 
 #### Headers
 
-As headers are often used in the processing of a request, we choosed to impose the implementation of a container for headers. We made it look as simple as possible.
+As headers are often used in the processing of a request, we chose to impose the implementation of a container for headers. We made it look as simple as possible.
 ```cpp
 class IHeaders {
 public:
