@@ -94,121 +94,94 @@ Hooked functions take a Context (see Context section below) and return a status 
 
 ## Context
 
-When a Stage is triggered it will call the different hooks and will give them a Context.
+The context given to each hook contains information about the processing of a request.
+```cpp
+struct Context {
+    headers::HTTPMessage request;
+    headers::HTTPMessage response;
+    int socketFd;
+};
+```
+* `request` will contain the original request of the client.
+* `response` should be filled by the different modules.
+* `socketFd` is here as a low level access to raw data.
 
- The **Context** is defined as follows :
-
- ```cpp
+```cpp
 namespace headers {
-
-    struct Request {
-        std::string method;
-        std::string path;
-        std::string httpVersion;
-    };
-     
-    struct Response {
-        std::string httpVersion;
-        std::string statusCode;
-        std::string message;
-    };
-     
     struct HTTPMessage {
         std::variant<Request, Response> firstLine;
         std::unique_ptr<IHeaders> headers;
         std::string body;
     };
 }
-
-struct Context {
-    headers::HTTPMessage request;
-    headers::HTTPMessage response;
-    int socketFd;
-};
- ```
-
-#### Struct Context
-
-```cpp
-struct Context {
- 	headers::HTTPMessage request;
- 	headers::HTTPMessage response;
- 	int socketFd;
- };
 ```
-
-In the `Context` structure, the field `request` will contain the original request of the client.<br/>
-The field `response` should be filled by the different modules.<br/>
-We give you the field `socketFd` if you want to read or write data depending on the modules. 
-
-#### Struct HTTPMessage
-
+* `firstLine` contains a Request or a Response depending on which HTTPMessage you use (see below for explanation of `std::variant`).
 ```cpp
-struct HTTPMessage {
-	std::variant<Request, Response> firstLine;
-	std::unique_ptr<IHeaders> headers;
-	std::string body;
-};
+namespace headers {
+    struct Request {
+        std::string method;
+        std::string path;
+        std::string httpVersion;
+    };
+
+    struct Response {
+        std::string httpVersion;
+        std::string statusCode;
+        std::string message;
+    };
+}
 ```
+* `headers` contains a `IHeaders` instance (see Headers section).
+* `body` contains the request's or response's body if any.
 
-The `firstLine` field contains a Request or Response depending on which HTTPMessage you are : <br/>
-* In `request` the type of firstLine will be a `struct Request`
-* In `response` the type of firstLine will be a `struct Response`
+#### std::variant
 
-To use a `std::variant` here is an example :
-(an std::variant is like an union in C, but it is type-safe)
-
+Here is an example of how to use a `std::variant`:
+(a std::variant is like an `union`, but type-safe)
 ```cpp
-dems::Context context{{dems::headers::Request{"GET", "/path/file", "HTTP/1.1"}, std::make_unique<dems::headers::Heading>(), ""},
-                     {dems::headers::Response{"HTTP/1.1", "200", "OK"},std::make_unique<dems::headers::Heading>(), ""}, 0};
+// This is how you staticaly create a dems::Context.
+dems::Context context{
+	{
+		dems::headers::Request{"GET", "/path/file", "HTTP/1.1"},
+		std::make_unique<dems::headers::Heading>(),
+		""
+	},{
+		dems::headers::Response{"HTTP/1.1", "200", "OK"},
+		std::make_unique<dems::headers::Heading>(),
+		""
+	}, 0
+};
 
-
+// This is how you retrieve the Request's firstLine property using std::get and log its path member.
 std::cout << std::get<dems::headers::Request>(context.request.firstLine).path << std::endl;
 ```
-On the fist line we show you how to create a `dems::Context`<br/>
-On the last line we take the path from the variant Request by using `std::get<T>`, `T` being the type you want (in this case, it is either `Request` or `Response`).
 
-The `headers` field contains a definition of Interface `IHeaders`
+#### Headers
 
+As headers are often used in the processing of a request, we choosed to impose the implementation of a container for headers. We made it look as simple as possible.
 ```cpp
 class IHeaders {
 public:
 	virtual ~IHeaders() = default;
 
 	virtual std::string &getHeader(const std::string &headerName) const = 0;
+	virtual const std::string &getHeader(const std::string &headerName) const = 0;
 
 	virtual void setHeader(const std::string &headerName, const std::string &value) = 0;
 };
 ```
+Every headers are key/value pairs. It's up to you to choose the underlying container.
+A headers presents as follows:
+* Name: `accept`
+* Value: `application/json`
 
-All class who inherit from `IHeaders` must provide its own container to store
-the Header, a headers is composed with a name and a value:
-
-* Name: accept
-* Value: application/json<br/>
-
-(key / value, which container to use ? ...)
-<br/>
-<br/>
-<br/>
-The last field of the HTTPMessage is the `body`.
-The `body` can be anything.<br/>
-
-example:
-```html
-<html>
-    <head></head>
-    <body>
-        <h1>Hello World</h1>
-    </body>
-</html>"
-```
+---
 
 That's all !
 If you have any questions contact:
 [anatole.juge@epitech.eu](mailto:anatole.juge@epitech.eu?subject=G%201%20kestion%20sur%20la%20pays)
 
-Here is a very very simple Logger Implementation:
+Here is a very very simple Logger module implementation:
 ```cpp
 static constexpr char MODULE_NAME[] = "Logger";
 
