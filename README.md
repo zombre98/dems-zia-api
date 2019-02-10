@@ -25,6 +25,7 @@ extern "C" {
 
 AModulesManager should be instanciated **only once** in your project.
 It will let you load a directory of modules or a single module via the functions `loadModules` or `loadOneModule` respectively.
+The modules **must** be loaded in alphabetical order.
 AModulesManager provides a StageManager through `getStageManager` (cf. StageManager section below).
 
 Each module must expose a function called `registerHooks` through the use of `extern`.
@@ -49,46 +50,51 @@ Functions registered to each stage should be called when the following happens:
 | **disconnection** | When the client disconnects from the server. |
 
 
-## Stage
+## Stages
+
+A stage is composed of three moments which permit the organization of modules in the specified stage.
+They are required through the use of the three function:
+* `hookToFirst`
+* `hookToMiddle`
+* `hookToLast`
+available on each stage.
 
 | Moment | Description |
 | --- | --- |
-| **first** | It's called before middle when the event occurs (e.g. SSL module). |
-| **middle** | It's called before last during the event (e.g. PHP module). |
-| **last** | It's called in the last moment of the event (e.g. Encryption SSL module). |
+| **first** | Early hook for modules that must prepare the request (e.g. SSL module). |
+| **middle** | Mostly for processing modules (e.g. PHP module). |
+| **last** | Called after processing (e.g. Logging module). |
 
 **If multiple functions hook to the same moment they will be called in the order the modules were loaded.**
 
-Example : 
+---
 
-When a request is received :
+# How It Works (in practice)
 
-It will trigger the "request" stage. So **you** will have to make the 
-call to the Stage and to the different "Moments" provided:
+1. A request is received 
+2. The server calls the "connection" stage.
+3. It calls the functions hooked by the modules to the "connection" stage:
+ * First hooks are called,
+ * then Middle hooks are called,
+ * finally Last hooks are called.
+4. It continues with the following stages...
 
-1. Request triggered 
-2. Call the "request" Stage
-3. Call the functions hooked by the modules 
-4. Firsts hooks Called 
-5. Middles Hooks Called 
-6. Lasts Hooks Called.
+---
 
-For example if you want to Hook a module Function to the beginning of the stage `request` you will have to do :
+# Hooked functions
 
-`manager.request().hookToFirst("moduleName", std::function<CodeStatus(Context &)>)`<br/>
-As you see the function takes a Context (see **Context**) and return a Status code defined in an enum : 
-
- ```cpp
+Hooked functions take a Context (see Context section below) and return a status code defined by the enum:
+```cpp
  enum class CodeStatus {
- 	OK, // If the module accept the call
- 	DECLINED, // If he decline
- 	HTTP_ERROR // If there is an error
+ 	OK, // The module accepts the call
+ 	DECLINED, // The module declines the call
+ 	HTTP_ERROR // The module alerts fo an error
  };
  ```
 
- ## Context
+## Context
 
- When a Stage is triggered it will call the different hooks and will give them a Context.
+When a Stage is triggered it will call the different hooks and will give them a Context.
 
  The **Context** is defined as follows :
 
