@@ -1,17 +1,20 @@
 # dems API Zia
-##### The goal of this Api is to provide a example on how to add modules to your Zia project
+##### The goal of this API is to provide an example on how to add modules to your Zia project
 ###### Produced by Armand Megrot, Bilel Fourati, Anatole Juge and Thomas Burgaud
 
-The goal of this API is to simplify the way you add modules in your ZIA<br/> In order to do this we tried to minimize the constraints that we impose<br/>
+The goal of this API is to simplify the way you add modules in your ZIA<br/>
+In order to do that we tried to minimize the constraints that we impose
 
-Documentation : https://zia.bilel-fourati.fr/
+Documentation: https://zia.bilel-fourati.fr/<br/>
+Discord: https://discord.gg/TwHGTn<br/>
+Issues: https://github.com/zombre98/dems-zia-api/issues
 
-For example to add your modules you just have to make : 
+For example to add a module you just have to do:
 ```cpp
 extern "C" {
 
     void registerHooks(api::StageManager &manager) {
-        manager.request().hookToEnd("Example", [](api::Context &ctx) {
+        manager.request().hookToEnd("MyModule", [](api::Context &ctx) {
             std::cout << "I'm an example module" << std::endl;
             return api::CodeStatus::OK;
         });
@@ -22,186 +25,164 @@ extern "C" {
 
 ## AModulesManager
 
-The implementation of AModulesManager **should** be instanciated **only once** in your project.<br/>
-It will let you load a directory of modules or a single module via the function `loadModules` or `loadOneModule`.<br/>
-AModulesManager bring you an implementation of StatesManager through `getStageManager`
+AModulesManager should be instanciated **only once** in your project.<br/>
+It will let you load a directory of modules or a single module via the functions `loadModules` or `loadOneModule` respectively.<br/>
+The modules **must** be loaded in alphabetical order.<br/>
+AModulesManager provides a StageManager through `getStageManager` (cf. StageManager section below).
 
-Each module needs to `extern` a function called `registerHooks`
-You should give them your StageManager. The StageManager will be used in order to hook* his functions where he wants.<br/>
- `registerHooks` will be used to hook your functions.
+Each module must expose a function called `registerHooks` through the use of `extern`.<br/>
+The server must call this function passing the StageManager as arguement. The module will use it to hook functions at different stages of the request process.
 
-For example, in pseudo-code, if you call your **StageManager** `manager` : <br/>
-`manager.stage.moment("moduleName", module)`
-
-\* **A hook** is a function that will be called each time that a Stage is triggered.Three different **moments** exist (see the Stage section for more details).
+For example, here is some code that would go in the `registerHooks` function of a module:
+```cpp
+stageManager.request().hookToMiddle("MyModule", myHandlerFunction);
+```
+(See the following sections for an explanation of `request()` and `hookToMiddle`)
 
 ## StageManager
 
-StageManager will manage many Stages in your Server.
-There is four Stages implemented:<br/>
+StageManager should handle the four different stages of a request process.<br/>
+Functions registered to each stage should be called when the following happens:
 
-| Stage      | Description |
-| :----:       |    :----:     |
-| **connection** | It should provide hooks* for when the clients connects to the server. |
-| **request** | When a server receives a request, the provided hooks of this Stage should be called.      |
-| **chunks**  | When a data it received by a chunk (see rfc2616) it should call the provided hooks of this stage      |
-| **disconnection**  | It should provide hooks for when the clients disconnects from the server.   |
+| Stage | Description |
+| --- | --- |
+| **connection** | When a connection is accepted. |
+| **request** | When the server has read the request. |
+| **chunks** | When data is received by chunks (see [rfc2616](https://www.ietf.org/rfc/rfc2616.txt) section 3.6.1) functions hooked to this stage will be called everytime a chunk is read. |
+| **disconnection** | When the client disconnects from the server. |
 
 
-## Stage
+## Stages
 
-| Moment      | Description |
-| :----:       |    :----:     |
-| **first** | It's called before middle when the event occurs (Example : SSL module)     |
-| **middle** | It's called before last during the event (Example : PHP module)       |
-| **last**  | It's called in the last moment of the event (Example : Encryption SSL module) |
+A stage is composed of three moments allowing the organization of modules in the specified stage.<br/>
+They are used through
+* `hookToFirst`,
+* `hookToMiddle`
+* and `hookToLast`
+
+available on each stage.
+
+| Moment | Description |
+| --- | --- |
+| **first** | Early hook for modules that must prepare the request (e.g. SSL module). |
+| **middle** | Mostly for processing modules (e.g. PHP module). |
+| **last** | Called after processing (e.g. Logging module). |
 
 **If multiple functions hook to the same moment they will be called in the order the modules were loaded.**
 
-Example : 
+---
 
-When a request is received :
+# How It Works (in practice)
 
-It will trigger the "request" stage. So **you** will have to make the 
-call to the Stage and to the different "Moments" provided:
+1. A request is received 
+2. The server calls the "connection" stage.
+3. It calls the functions hooked by the modules to the "connection" stage:
+ * First hooks are called,
+ * then Middle hooks are called,
+ * finally Last hooks are called.
+4. It continues with the following stages...
 
-1. Request triggered 
-2. Call the "request" Stage
-3. Call the functions hooked by the modules 
-4. Firsts hooks Called 
-5. Middles Hooks Called 
-6. Lasts Hooks Called.
+---
 
-For example if you want to Hook a module Function to the beginning of the stage `request` you will have to do :
+# Hooked functions
 
-`manager.request().hookToFirst("moduleName", std::function<CodeStatus(Context &)>)`<br/>
-As you see the function takes a Context (see **Context**) and return a Status code defined in an enum : 
-
- ```cpp
+Hooked functions take a Context (see Context section below) and return a status code defined by the enum:
+```cpp
  enum class CodeStatus {
- 	OK, // If the module accept the call
- 	DECLINED, // If he decline
- 	HTTP_ERROR // If there is an error
+ 	OK, // The module accepts the call
+ 	DECLINED, // The module declines the call
+ 	HTTP_ERROR // The module alerts fo an error
  };
  ```
 
- ## Context
+## Context
 
- When a Stage is triggered it will call the different hooks and will give them a Context.
+The context given to each hook contains information about the processing of a request.
+```cpp
+struct Context {
+    headers::HTTPMessage request;
+    headers::HTTPMessage response;
+    int socketFd;
+};
+```
+* `request` will contain the original request of the client.
+* `response` should be filled by the different modules.
+* `socketFd` is here as a low level access to raw data.
 
- The **Context** is defined as follows :
-
- ```cpp
+```cpp
 namespace headers {
-
-    struct Request {
-        std::string method;
-        std::string path;
-        std::string httpVersion;
-    };
-     
-    struct Response {
-        std::string httpVersion;
-        std::string statusCode;
-        std::string message;
-    };
-     
     struct HTTPMessage {
         std::variant<Request, Response> firstLine;
         std::unique_ptr<IHeaders> headers;
         std::string body;
     };
 }
-
-struct Context {
-    headers::HTTPMessage request;
-    headers::HTTPMessage response;
-    int socketFd;
-};
- ```
-
-#### Struct Context
-
-```cpp
-struct Context {
- 	headers::HTTPMessage request;
- 	headers::HTTPMessage response;
- 	int socketFd;
- };
 ```
-
-In the `Context` structure, the field `request` will contain the original request of the client.<br/>
-The field `response` should be filled by the different modules.<br/>
-We give you the field `socketFd` if you want to read or write data depending on the modules. 
-
-#### Struct HTTPMessage
-
+* `firstLine` contains a Request or a Response depending on which HTTPMessage you use (see below for explanation of `std::variant`).
 ```cpp
-struct HTTPMessage {
-	std::variant<Request, Response> firstLine;
-	std::unique_ptr<IHeaders> headers;
-	std::string body;
-};
+namespace headers {
+    struct Request {
+        std::string method;
+        std::string path;
+        std::string httpVersion;
+    };
+
+    struct Response {
+        std::string httpVersion;
+        std::string statusCode;
+        std::string message;
+    };
+}
 ```
+* `headers` contains a `IHeaders` instance (see Headers section).
+* `body` contains the request's or response's body if any.
 
-The `firstLine` field contains a Request or Response depending on which HTTPMessage you are : <br/>
-* In `request` the type of firstLine will be a `struct Request`
-* In `response` the type of firstLine will be a `struct Response`
+#### std::variant
 
-To use a `std::variant` here is an example :
-(an std::variant is like an union in C, but it is type-safe)
-
+Here is an example of how to use a `std::variant`:<br/>
+(a [std::variant](https://en.cppreference.com/w/cpp/utility/variant) is like an `union`, but type-safe)
 ```cpp
-dems::Context context{{dems::headers::Request{"GET", "/path/file", "HTTP/1.1"}, std::make_unique<dems::headers::Heading>(), ""},
-                     {dems::headers::Response{"HTTP/1.1", "200", "OK"},std::make_unique<dems::headers::Heading>(), ""}, 0};
+// This is how you staticaly create a dems::Context.
+dems::Context context{
+	{
+		dems::headers::Request{"GET", "/path/file", "HTTP/1.1"},
+		std::make_unique<dems::headers::Heading>(),
+		""
+	},{
+		dems::headers::Response{"HTTP/1.1", "200", "OK"},
+		std::make_unique<dems::headers::Heading>(),
+		""
+	}, 0
+};
 
-
+// This is how you retrieve the Request's firstLine property using std::get and log its path member.
 std::cout << std::get<dems::headers::Request>(context.request.firstLine).path << std::endl;
 ```
-On the fist line we show you how to create a `dems::Context`<br/>
-On the last line we take the path from the variant Request by using `std::get<T>`, `T` being the type you want (in this case, it is either `Request` or `Response`).
 
-The `headers` field contains a definition of Interface `IHeaders`
+#### Headers
 
+As headers are often used in the processing of a request, we chose to impose the implementation of a container for headers. We made it look as simple as possible.
 ```cpp
 class IHeaders {
 public:
 	virtual ~IHeaders() = default;
 
 	virtual std::string &getHeader(const std::string &headerName) const = 0;
+	virtual const std::string &getHeader(const std::string &headerName) const = 0;
 
 	virtual void setHeader(const std::string &headerName, const std::string &value) = 0;
 };
 ```
+Every headers are key/value pairs. It's up to you to choose the underlying container.<br/>
+A headers presents as follows:
+* Name: `accept`
+* Value: `application/json`
 
-All class who inherit from `IHeaders` must provide its own container to store
-the Header, a headers is composed with a name and a value:
-
-* Name: accept
-* Value: application/json<br/>
-
-(key / value, which container to use ? ...)
-<br/>
-<br/>
-<br/>
-The last field of the HTTPMessage is the `body`.
-The `body` can be anything.<br/>
-
-example:
-```html
-<html>
-    <head></head>
-    <body>
-        <h1>Hello World</h1>
-    </body>
-</html>"
-```
+---
 
 That's all !
-If you have any questions contact:
-[anatole.juge@epitech.eu](mailto:anatole.juge@epitech.eu?subject=G%201%20kestion%20sur%20la%20pays)
 
-Here is a very very simple Logger Implementation:
+Here is a very very simple Logger module implementation:
 ```cpp
 static constexpr char MODULE_NAME[] = "Logger";
 
