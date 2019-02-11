@@ -13,10 +13,10 @@ For example to add a module you just have to do:
 ```cpp
 extern "C" {
 
-    void registerHooks(api::StageManager &manager) {
-        manager.request().hookToEnd("MyModule", [](api::Context &ctx) {
+    void registerHooks(dems::StageManager &manager) {
+        manager.request().hookToEnd("MyModule", [](dems::Context &ctx) {
             std::cout << "I'm an example module" << std::endl;
-            return api::CodeStatus::OK;
+            return dems::CodeStatus::OK;
         });
     }
 
