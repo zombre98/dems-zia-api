@@ -41,7 +41,7 @@ stageManager.request().hookToMiddle("MyModule", myHandlerFunction);
 
 ## StageManager
 
-StageManager should handle the different stages of a request process.<br/>
+StageManager should handle the four different stages of a request process.<br/>
 Functions registered to each stage should be called when the following happens:
 
 | Stage | Description |
