@@ -5,6 +5,7 @@
 #pragma once
 
 #include <variant>
+#include <memory>
 
 namespace dems { namespace header {
 
