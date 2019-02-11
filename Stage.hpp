@@ -7,6 +7,7 @@
 #include <string>
 #include <list>
 #include <functional>
+#include <vector>
 #include "Heading.hpp"
 
 namespace dems {
@@ -25,6 +26,7 @@ enum class CodeStatus {
  * The context that is send to each hook callback when a stage is triggered
  */
 struct Context {
+        std::vector<uint8_t> rawData;
 	header::HTTPMessage request;
 	header::HTTPMessage response;
 	int socketFd;
