@@ -10,6 +10,9 @@
 #include <functional>
 #include "Heading.hpp"
 
+/**
+ * @brief dems namespace
+ */
 namespace dems {
 
 /**
@@ -23,7 +26,7 @@ enum class CodeStatus {
 };
 
 /**
- * The context that is send to each hook callback when a stage is triggered
+ * The context that is sent to each hook callback when a stage is triggered
  */
 struct Context {
 	std::vector<uint8_t> rawData;
@@ -34,20 +37,29 @@ struct Context {
 
 /**
  * @class Stage
- * Define function that will be called at a certain Moment.
- * The hook will be at the First, middle and end of this Moment.
- * First is Before the Moment
- * Middle is during the Moment
- * End is when the Moment ends
+ * Defines function that will be called at a certain Stage.
+ * The hook will be at the First, middle and end of this Stage.
+ * First is at Stage start
+ * Middle is during the Stage
+ * End is at Stage end
  */
 class Stage {
 public:
+	/**
+	 * @brief Defines a callback function
+	 */
 	using hookModuleCallback = std::function<CodeStatus(Context &)>;
+	/**
+	 * @brief Defines a hooked module function
+	 */
 	struct hook {
 		hook(std::string const &name, hookModuleCallback &&function) : moduleName(name), callback(std::move(function)) {}
 		std::string moduleName;
 		hookModuleCallback callback;
 	};
+	/**
+	 * @brief Defines a map of hooked functions
+	 */
 	using hookMap = std::multimap<uint, hook>;
 public:
 	/**
@@ -79,20 +91,20 @@ public:
 	}
 
 	/**
-	 * Return the modules hooked to the debut of the stage
+	 * Returns the modules hooked to the debut of the stage
 	 * @return std::list of the modules hooked to the first
 	 */
-	const hookMap &firstsHooks() { return first_; }
+	const hookMap &firstHooks() { return first_; }
 	/**
-	 * Return the modules hooked to the middle of the stage
-	 * @return std::list of the modules hooked to the middles
+	 * Returns the modules hooked to the middle of the stage
+	 * @return std::list of the modules hooked to the middle
 	 */
-	const hookMap &middlesHooks() { return middle_; }
+	const hookMap &middleHooks() { return middle_; }
 	/**
-	 * Return the modules hooked to the end of the stage
-	 * @return std::list of the modules hooked to the ends
+	 * Returns the modules hooked to the end of the stage
+	 * @return std::list of the modules hooked to the end
 	 */
-	const hookMap &endsHooks() { return last_; }
+	const hookMap &endHooks() { return last_; }
 
 private:
 	hookMap first_;
@@ -102,32 +114,32 @@ private:
 
 /**
  * @class StageManager
- * Define the differents Stage and manage them
+ * Defines the different Stages and manages them
  */
 class StageManager {
 public:
 
 	/**
-	 * Get the whole Request Stage
+	 * Gets the whole Request Stage
 	 * @return Request Stage
 	 */
 	Stage &request() { return request_; }
 
 	/**
-	 * Get the whole Configs Stage
-	 * @return Connection Stage
+	 * Gets the whole Config Stage
+	 * @return Config Stage
 	 */
 	Stage &connection() { return connection_; }
 
 	/**
-	 * Get the chunk Stage
+	 * Gets the chunks Stage
 	 * @return Chunks Stage
 	 */
 	Stage &chunks() { return chunks_; }
 
 	/**
-	 * Get the disconnect Stage
-	 * @return Chunks Stage
+	 * Gets the disconnect Stage
+	 * @return Disconnect Stage
 	 */
 	Stage &disconnect() { return disconnection_; }
 

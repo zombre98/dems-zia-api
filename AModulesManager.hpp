@@ -7,11 +7,14 @@
 #include <string>
 #include "Stage.hpp"
 
+/**
+ * @brief dems namespace
+ */
 namespace dems {
 
 /**
  * @class AModulesManager
- * Abstract class to implement for loading the differents module
+ * Abstract class to implement for loading the different module
  */
 class AModulesManager {
 public:
@@ -20,24 +23,25 @@ public:
 	 */
 	virtual ~AModulesManager() = default;
 	/**
-	 * Load all the modules present in a directory
+	 * Loads all the modules present in a directory in numerical, then alphabetical order
+	 * (e.g. 01_modssl.so then modphp.so then modzlib.so)
 	 * @param directoryPath the path to the directory containing the modules
 	 */
 	virtual void loadModules(const std::string &directoryPath) = 0;
 	/**
-	 * Load one module
+	 * Loads one module
 	 * @param filePath the path to the module
 	 */
 	virtual void loadOneModule(const std::string &filePath) = 0;
 
 	/**
-	* Unload a Module
+	* Unloads a Module
 	* @param moduleName The module to unload
 	*/
 	virtual void unloadModule(const std::string &moduleName) = 0;
 
 	/**
-	 * Get the Stage Manager
+	 * Gets the Stage Manager
 	 * @return Stage Manager
 	 */
 	StageManager &getStageManager() { return stageManager_; }
