@@ -6,7 +6,7 @@ The goal of this API is to simplify the way you add modules in your ZIA<br/>
 In order to do that we tried to minimize the constraints that we impose
 
 Documentation: https://zia.bilel-fourati.fr/<br/>
-Discord: https://discord.gg/TwHGTn<br/>
+Discord: https://discord.gg/YymhyAx<br/>
 Issues: https://github.com/zombre98/dems-zia-api/issues
 
 For example to add a module you just have to do:
@@ -14,7 +14,7 @@ For example to add a module you just have to do:
 extern "C" {
 
     void registerHooks(dems::StageManager &manager) {
-        manager.request().hookToEnd("MyModule", [](dems::Context &ctx) {
+        manager.request().hookToEnd(0, "MyModule", [](dems::Context &ctx) {
             std::cout << "I'm an example module" << std::endl;
             return dems::CodeStatus::OK;
         });
@@ -35,7 +35,7 @@ The server must call this function passing the StageManager as arguement. The mo
 
 For example, here is some code that would go in the `registerHooks` function of a module:
 ```cpp
-stageManager.request().hookToMiddle("MyModule", myHandlerFunction);
+stageManager.request().hookToMiddle(0, "MyModule", myHandlerFunction);
 ```
 (See the following sections for an explanation of `request()` and `hookToMiddle`)
 
@@ -68,13 +68,14 @@ available on each stage.
 | **middle** | Mostly for processing modules (e.g. PHP module). |
 | **last** | Called after processing (e.g. Logging module). |
 
-**If multiple functions hook to the same moment they will be called in the order the modules were loaded.**
+**If you wan't to hook multiple modules to the same hook you can choose the execution order by giving an index to the function.**
+**The index will be used to sort the Stage Object map.**
 
 ---
 
 # How It Works (in practice)
 
-1. A request is received 
+1. A request is received
 2. The server calls the "connection" stage.
 3. It calls the functions hooked by the modules to the "connection" stage:
  * First hooks are called,
@@ -91,7 +92,7 @@ Hooked functions take a Context (see Context section below) and return a status 
  enum class CodeStatus {
  	OK, // The module accepts the call
  	DECLINED, // The module declines the call
- 	HTTP_ERROR // The module alerts fo an error
+ 	HTTP_ERROR // The module alerts in case of an error
  };
  ```
 
@@ -100,6 +101,7 @@ Hooked functions take a Context (see Context section below) and return a status 
 The context given to each hook contains information about the processing of a request.
 ```cpp
 struct Context {
+    std::vector<uint8_t> rawData;
     headers::HTTPMessage request;
     headers::HTTPMessage response;
     int socketFd;
@@ -189,19 +191,19 @@ static constexpr char MODULE_NAME[] = "Logger";
 extern "C" {
 
 void registerHooks(dems::StageManager &manager) {
-    manager.request().hookToFirst(MODULE_NAME, [](dems::Context &ctx) {
+    manager.request().hookToFirst(0, MODULE_NAME, [](dems::Context &ctx) {
         std::cout << "Stage: Request FIRST" << std::endl;
         std::cout << ctx.response.body << std::endl;
         return dems::CodeStatus::OK;
     });
 
-    manager.request().hookToMiddle(MODULE_NAME, [](dems::Context &ctx) {
+    manager.request().hookToMiddle(0, MODULE_NAME, [](dems::Context &ctx) {
         std::cout << "Stage: Request MIDDLE" << std::endl;
         std::cout << ctx.response.body << std::endl;
         return dems::CodeStatus::OK;
     });
 
-    manager.request().hookToEnd(MODULE_NAME, [](dems::Context &ctx) {
+    manager.request().hookToEnd(0, MODULE_NAME, [](dems::Context &ctx) {
         std::cout << "Stage: Request END" << std::endl;
         std::cout << ctx.response.body << std::endl;
         return dems::CodeStatus::OK;

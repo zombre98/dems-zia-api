@@ -5,9 +5,9 @@
 #pragma once
 
 #include <string>
-#include <list>
-#include <functional>
+#include <map>
 #include <vector>
+#include <functional>
 #include "Heading.hpp"
 
 namespace dems {
@@ -26,7 +26,7 @@ enum class CodeStatus {
  * The context that is send to each hook callback when a stage is triggered
  */
 struct Context {
-        std::vector<uint8_t> rawData;
+	std::vector<uint8_t> rawData;
 	header::HTTPMessage request;
 	header::HTTPMessage response;
 	int socketFd;
@@ -36,60 +36,68 @@ struct Context {
  * @class Stage
  * Define function that will be called at a certain Moment.
  * The hook will be at the First, middle and end of this Moment.
- * Firts is Before the Moment
+ * First is Before the Moment
  * Middle is during the Moment
  * End is when the Moment ends
  */
 class Stage {
 public:
 	using hookModuleCallback = std::function<CodeStatus(Context &)>;
-	using hookList = std::list<std::pair<std::string, hookModuleCallback>>;
+	struct hook {
+		hook(std::string const &name, hookModuleCallback &&function) : moduleName(name), callback(std::move(callback)) {}
+		std::string moduleName;
+		hookModuleCallback callback;
+	};
+	using hookMap = std::map<uint, hook>;
 public:
 	/**
 	 * Hook to the start of the stage
+	 * @param index The index for the map order
 	 * @param moduleName The name of the module
 	 * @param callback The callback called when a stage Time is triggered
 	 */
-	void hookToFirst(const std::string &moduleName, hookModuleCallback &&callback) {
-		first_.emplace_back(moduleName, std::move(callback));
+	void hookToFirst(uint index, const std::string &moduleName, hookModuleCallback &&callback) {
+		first_.emplace(index, hook{moduleName, std::move(callback)});
 	}
 	/**
 	 * Hook to the middle of the stage
+	 * @param index The index for the map order
 	 * @param moduleName The name of the module
 	 * @param callback The callback called when a stage Time is triggered
 	 */
-	void hookToMiddle(const std::string &moduleName, hookModuleCallback &&callback) {
-		middle_.emplace_back(moduleName, std::move(callback));
+	void hookToMiddle(uint index, const std::string &moduleName, hookModuleCallback &&callback) {
+		middle_.emplace(index, hook{moduleName, std::move(callback)});
 	}
 	/**
 	 * Hook to the end of the stage
+	 * @param index The index for the map order
 	 * @param moduleName The name of the module
 	 * @param callback The callback called when a stage Time is triggered
 	 */
-	void hookToEnd(const std::string &moduleName, hookModuleCallback &&callback) {
-		last_.emplace_back(moduleName, std::move(callback));
+	void hookToEnd(uint index, const std::string &moduleName, hookModuleCallback &&callback) {
+		last_.emplace(index, hook{moduleName, std::move(callback)});
 	}
 
 	/**
 	 * Return the modules hooked to the debut of the stage
 	 * @return std::list of the modules hooked to the first
 	 */
-	const hookList &firstsHooks() { return first_; }
+	const hookMap &firstsHooks() { return first_; }
 	/**
 	 * Return the modules hooked to the middle of the stage
 	 * @return std::list of the modules hooked to the middles
 	 */
-	const hookList &middlesHooks() { return middle_; }
+	const hookMap &middlesHooks() { return middle_; }
 	/**
 	 * Return the modules hooked to the end of the stage
 	 * @return std::list of the modules hooked to the ends
 	 */
-	const hookList &endsHooks() { return last_; }
+	const hookMap &endsHooks() { return last_; }
 
 private:
-	hookList first_;
-	hookList middle_;
-	hookList last_;
+	hookMap first_;
+	hookMap middle_;
+	hookMap last_;
 };
 
 /**
