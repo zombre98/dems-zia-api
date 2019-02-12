@@ -13,11 +13,12 @@ For example to add a module you just have to do:
 ```cpp
 extern "C" {
 
-    void registerHooks(dems::StageManager &manager) {
+  std::string registerHooks(dems::StageManager &manager) {
         manager.request().hookToEnd(0, "MyModule", [](dems::Context &ctx) {
             std::cout << "I'm an example module" << std::endl;
             return dems::CodeStatus::OK;
         });
+        return "MyModule";
     }
 
 };
@@ -27,10 +28,9 @@ extern "C" {
 
 AModulesManager should be instanciated **only once** in your project.<br/>
 It will let you load a directory of modules or a single module via the functions `loadModules` or `loadOneModule` respectively.<br/>
-The modules **must** be loaded in alphabetical order.<br/>
 AModulesManager provides a StageManager through `getStageManager` (cf. StageManager section below).
 
-Each module must expose a function called `registerHooks` through the use of `extern`.<br/>
+Each module must expose a function called `registerHooks` through the use of `extern` (for unix based system...), it must return the name of the module.<br/>
 The server must call this function passing the StageManager as arguement. The module will use it to hook functions at different stages of the request process.
 
 For example, here is some code that would go in the `registerHooks` function of a module:
@@ -191,7 +191,7 @@ static constexpr char MODULE_NAME[] = "Logger";
 
 extern "C" {
 
-void registerHooks(dems::StageManager &manager) {
+  std::string registerHooks(dems::StageManager &manager) {
     manager.request().hookToFirst(0, MODULE_NAME, [](dems::Context &ctx) {
         std::cout << "Stage: Request FIRST" << std::endl;
         std::cout << ctx.response.body << std::endl;
@@ -209,6 +209,7 @@ void registerHooks(dems::StageManager &manager) {
         std::cout << ctx.response.body << std::endl;
         return dems::CodeStatus::OK;
     });
+    return MODULE_NAME;
 }
 
 };
