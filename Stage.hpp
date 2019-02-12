@@ -48,7 +48,7 @@ public:
 		std::string moduleName;
 		hookModuleCallback callback;
 	};
-	using hookMap = std::map<uint, hook>;
+	using hookMap = std::multimap<uint, hook>;
 public:
 	/**
 	 * Hook to the start of the stage
