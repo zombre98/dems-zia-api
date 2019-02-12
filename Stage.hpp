@@ -44,7 +44,7 @@ class Stage {
 public:
 	using hookModuleCallback = std::function<CodeStatus(Context &)>;
 	struct hook {
-		hook(std::string const &name, hookModuleCallback &&function) : moduleName(name), callback(std::move(callback)) {}
+		hook(std::string const &name, hookModuleCallback &&function) : moduleName(name), callback(std::move(function)) {}
 		std::string moduleName;
 		hookModuleCallback callback;
 	};
