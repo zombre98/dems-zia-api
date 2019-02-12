@@ -28,7 +28,15 @@ public:
 	 * @param headerName The header name
 	 * @return The value corresponding to the header name
 	 */
-	virtual std::string &getHeader(const std::string &headerName) const = 0;
+	virtual std::string &getHeader(const std::string &headerName) = 0;
+
+  	/**
+	 * Give you the consteness value corresponding to the Header Name
+	 * For example: ( accept: application/json ) := getHeader("accept") => return "application/json"
+	 * @param headerName The header name
+	 * @return The value corresponding to the header name
+	 */
+	virtual std::string const &getHeader(const std::string &headerName) const = 0;
 
 	/**
 	 * Set the value corresponding to the headerName
