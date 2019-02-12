@@ -31,6 +31,12 @@ public:
 	virtual void loadOneModule(const std::string &filePath) = 0;
 
 	/**
+	* Unload a Module
+	* @param moduleName The module to unload
+	*/
+	virtual void unloadModule(const std::string &moduleName) = 0;
+
+	/**
 	 * Get the Stage Manager
 	 * @return Stage Manager
 	 */
