@@ -91,20 +91,72 @@ public:
 	}
 
 	/**
+	 * Unload a module in the first moment
+	 * @param moduleName The name of the module
+	 */
+	void unhookFirst(const std::string &moduleName) {
+		for (auto &[idx, hook] : first_) {
+			if (hook.moduleName == moduleName)
+				first_.erase(idx);
+		}
+	}
+
+	/**
+	 * Unload a module in the middle moment
+	 * @param moduleName the name of the module
+	 */
+	void unhookMiddle(const std::string &moduleName) {
+		for (auto &[idx, hook] : middle_) {
+			if (hook.moduleName == moduleName)
+				middle_.erase(idx);
+		}
+	}
+
+	/**
+	 * Unload a module in the Last moment
+	 * @param moduleName the name of the module
+	 */
+	void unhookLast(const std::string &moduleName) {
+		for (auto &[idx, hook] : last_) {
+			if (hook.moduleName == moduleName)
+				last_.erase(idx);
+		}
+	}
+
+	/**
+	 * Unhook a module in the 3 moments
+	 * @param moduleName the name of the module
+	 */
+	void unhookAll(const std::string &moduleName) {
+		unhookFirst(moduleName);
+		unhookMiddle(moduleName);
+		unhookLast(moduleName);
+	}
+
+	/**
+	 * Clear All the hooks
+	 */
+	void clearHooks() {
+		first_.clear();
+		middle_.clear();
+		last_.clear();
+	}
+
+	/**
 	 * Returns the modules hooked to the debut of the stage
 	 * @return std::list of the modules hooked to the first
 	 */
-	const hookMap &firstHooks() { return first_; }
+	hookMap &firstHooks() { return first_; }
 	/**
 	 * Returns the modules hooked to the middle of the stage
 	 * @return std::list of the modules hooked to the middle
 	 */
-	const hookMap &middleHooks() { return middle_; }
+	hookMap &middleHooks() { return middle_; }
 	/**
 	 * Returns the modules hooked to the end of the stage
 	 * @return std::list of the modules hooked to the end
 	 */
-	const hookMap &endHooks() { return last_; }
+	hookMap &endHooks() { return last_; }
 
 private:
 	hookMap first_;
