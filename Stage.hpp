@@ -52,15 +52,15 @@ public:
 	/**
 	 * @brief Defines a hooked module function
 	 */
-	struct hook {
-		hook(std::string const &name, hookModuleCallback &&function) : moduleName(name), callback(std::move(function)) {}
+	struct Hook {
+    Hook(std::string name, hookModuleCallback &&function) : moduleName(std::move(name)), callback(std::move(function)) {}
 		std::string moduleName;
 		hookModuleCallback callback;
 	};
 	/**
 	 * @brief Defines a map of hooked functions
 	 */
-	using hookMap = std::multimap<uint, hook>;
+	using hookMap = std::multimap<uint, Hook>;
 public:
 	/**
 	 * Hook to the start of the stage
@@ -69,7 +69,7 @@ public:
 	 * @param callback The callback called when a stage Time is triggered
 	 */
 	void hookToFirst(uint index, const std::string &moduleName, hookModuleCallback &&callback) {
-		first_.emplace(index, hook{moduleName, std::move(callback)});
+		first_.emplace(index, Hook{moduleName, std::move(callback)});
 	}
 	/**
 	 * Hook to the middle of the stage
@@ -78,7 +78,7 @@ public:
 	 * @param callback The callback called when a stage Time is triggered
 	 */
 	void hookToMiddle(uint index, const std::string &moduleName, hookModuleCallback &&callback) {
-		middle_.emplace(index, hook{moduleName, std::move(callback)});
+		middle_.emplace(index, Hook{moduleName, std::move(callback)});
 	}
 	/**
 	 * Hook to the end of the stage
@@ -87,7 +87,7 @@ public:
 	 * @param callback The callback called when a stage Time is triggered
 	 */
 	void hookToEnd(uint index, const std::string &moduleName, hookModuleCallback &&callback) {
-		last_.emplace(index, hook{moduleName, std::move(callback)});
+		last_.emplace(index, Hook{moduleName, std::move(callback)});
 	}
 
 	/**
