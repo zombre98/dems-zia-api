@@ -170,7 +170,7 @@ class IHeaders {
 public:
 	virtual ~IHeaders() = default;
 
-	virtual std::string &getHeader(const std::string &headerName) const = 0;
+	virtual std::string &operator[](const std::string &headerName) = 0;
 	virtual const std::string &getHeader(const std::string &headerName) const = 0;
 
 	virtual void setHeader(const std::string &headerName, const std::string &value) = 0;
