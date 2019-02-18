@@ -96,8 +96,10 @@ public:
 	 */
 	void unhookFirst(const std::string &moduleName) {
 		for (auto &[idx, hook] : first_) {
-			if (hook.moduleName == moduleName)
+			if (hook.moduleName == moduleName) {
 				first_.erase(idx);
+                                break;
+                        }
 		}
 	}
 
@@ -107,8 +109,10 @@ public:
 	 */
 	void unhookMiddle(const std::string &moduleName) {
 		for (auto &[idx, hook] : middle_) {
-			if (hook.moduleName == moduleName)
+			if (hook.moduleName == moduleName) {
 				middle_.erase(idx);
+                                break;
+                        }
 		}
 	}
 
@@ -118,8 +122,10 @@ public:
 	 */
 	void unhookLast(const std::string &moduleName) {
 		for (auto &[idx, hook] : last_) {
-			if (hook.moduleName == moduleName)
+			if (hook.moduleName == moduleName) {
 				last_.erase(idx);
+                                break;
+                        }
 		}
 	}
 
