@@ -9,6 +9,7 @@
 #include <vector>
 #include <functional>
 #include "Heading.hpp"
+#include "Config.hpp"
 
 /**
  * @brief dems namespace
@@ -33,6 +34,7 @@ struct Context {
 	header::HTTPMessage request;
 	header::HTTPMessage response;
 	int socketFd;
+	dems::config::Config config;
 };
 
 /**
