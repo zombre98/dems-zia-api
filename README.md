@@ -106,11 +106,13 @@ struct Context {
     headers::HTTPMessage request;
     headers::HTTPMessage response;
     int socketFd;
+    dems::config::Config config;
 };
 ```
 * `request` will contain the original request of the client.
 * `response` should be filled by the different modules.
 * `socketFd` is here as a low level access to raw data.
+* `config` contain settings of modules
 
 ```cpp
 namespace headers {
@@ -180,6 +182,18 @@ Every headers are key/value pairs. It's up to you to choose the underlying conta
 A headers presents as follows:
 * Name: `accept`
 * Value: `application/json`
+
+#### Config
+
+Format of the minimum configuration file :
+```json
+{
+	"modules": {
+		"PhP": {"path": "path/to/PhP", "option":"Option 1"},
+		"SSL": {"path": "path/to/ssl"}
+	}
+}
+```
 
 ---
 
