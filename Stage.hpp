@@ -8,6 +8,9 @@
 #include <map>
 #include <vector>
 #include <functional>
+#ifdef WIN32
+#include <winsock2.h>
+#endif
 #include "Heading.hpp"
 #include "Config.hpp"
 
@@ -33,7 +36,11 @@ struct Context {
 	std::vector<uint8_t> rawData;
 	header::HTTPMessage request;
 	header::HTTPMessage response;
+#ifdef WIN32
+	SOCKET socketFd;
+#else
 	int socketFd;
+#endif
 	dems::config::Config config;
 };
 
@@ -55,7 +62,7 @@ public:
 	 * @brief Defines a hooked module function
 	 */
 	struct Hook {
-    Hook(std::string name, hookModuleCallback &&function) : moduleName(std::move(name)), callback(std::move(function)) {}
+		Hook(std::string name, hookModuleCallback &&function) : moduleName(std::move(name)), callback(std::move(function)) {}
 		std::string moduleName;
 		hookModuleCallback callback;
 	};
